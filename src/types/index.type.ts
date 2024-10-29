@@ -123,3 +123,12 @@ export type VideoCommentProps = {
     videoId: string | null;
   }[];
 };
+
+export type NotificationCountProps = {
+  status: number;
+  data: {
+    _count: {
+      notification: number;
+    };
+  };
+};

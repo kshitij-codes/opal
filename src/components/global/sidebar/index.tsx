@@ -11,27 +11,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { useQueryData } from "@/hooks/useQueryData";
 import { getWorkSpaces } from "@/actions/workspace";
-import { WorkspaceProps } from "@/types/index.type";
+import { NotificationCountProps, NotificationProps, WorkspaceProps } from "@/types/index.type";
 import Modal from "../modal";
 import { Button } from "@/components/ui/button";
-import { Link, PlusCircle } from "lucide-react";
+import { Link, Menu, PlusCircle } from "lucide-react";
 import Search from "../search";
 import { MENU_ITEMS } from "@/constants";
+import SidebarItem from "./SidebarItem";
+import { getNotifications } from "@/actions/user";
+import WorkspacePlaceholder from "./WorkspacePlaceholder";
+import GlobalCard from "../global-card";
+import Loader from "../loader";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import InfoBar from "../info-bar";
 type Props = {
   activeWorkSpaceId: string;
 };
 
 const Sidebar = ({ activeWorkSpaceId }: Props) => {
   const router = useRouter();
+  const pathname = usePathname();
   const { data, isFetched } = useQueryData(["user-workspaces"], () =>
     getWorkSpaces(activeWorkSpaceId)
   );
   const menuItems = MENU_ITEMS(activeWorkSpaceId);
+  const { data: notifications } = useQueryData(
+    ["user-notifications"],
+    getNotifications
+  );
   const { data: workspace } = data as WorkspaceProps;
+  const { data: count } = notifications as NotificationCountProps;
   const onChangeActiveWorkspace = (value: string) => {
     router.push(`/dashboard/${value}`);
   };
@@ -40,10 +53,13 @@ const Sidebar = ({ activeWorkSpaceId }: Props) => {
     (item) => item.id === activeWorkSpaceId
   );
 
-  return (
-    <div className="bg-[#111111] flex-none relative p-4 h-full w-[250px] flex flex-col gap-4 items-center mb-4 absolute top-0 left-0 right-0">
+
+  const SidebarSection = (
+    <div className="bg-[#111111] flex-none relative p-4 h-full w-[250px] flex flex-col gap-4 items-center overflow-hidden">
+    <div className="bg-[#111111] relative p-4 h-full w-[250px] gap-2 justify-center items-center mb-4 absolute top-0 left-0 right-0">
       <Image src="/opal-logo.svg" alt="logo" width={40} height={40} />
       <p className="text-2xl font-bold text-white">Opal</p>
+    </div>
       <Select
         defaultValue={activeWorkSpaceId}
         onValueChange={onChangeActiveWorkspace}
@@ -94,12 +110,108 @@ const Sidebar = ({ activeWorkSpaceId }: Props) => {
         )}
       <p className="w-full font-bold mt-4 text-[#9d9d9d]">Menu</p>
       <nav className="w-full">
-        {/* {menuItems.map((item) => (
-          <Link
-        ))} */}
+        <ul>
+          {
+            menuItems.map((item) => (
+              <SidebarItem
+                key={item.title}
+                href={item.href}
+                icon={item.icon}
+                title={item.title}
+                selected={pathname === item.href}
+                notifications={
+                  (item.title === "Notifications" &&
+                    count._count &&
+                    count._count.notification) ||
+                  0
+                }
+              />
+            ))
+          }
+        </ul>
       </nav>
+      <Separator className="w-4/5" />
+      <p className="w-full font-bold mt-4 text-[#9d9d9d]">Workspaces</p>
+
+      {workspace.workspace.length === 1 && workspace.members.length === 0 && (
+        <div className="w-full mt-[-10px]">
+          <p className="text-[#3c3c3c] font-medium text-sm">
+            {workspace.subscription?.plan === 'FREE'
+              ? 'Upgrade to create workspaces'
+              : 'No Workspaces'}
+          </p>
+        </div>
+      )}
+
+      <nav className="w-full">
+      <ul className="h-[150px] overflow-auto overflow-x-hidden fade-layer">
+        {workspace.workspace.length > 0 &&
+          workspace.workspace.map(
+            (item) =>
+              item.type !== 'PERSONAL' && (
+                <SidebarItem
+                  href={`/dashboard/${item.id}`}
+                  selected={pathname === `/dashboard/${item.id}`}
+                  title={item.name}
+                  notifications={0}
+                  key={item.name}
+                  icon={
+                    <WorkspacePlaceholder>
+                      {item.name.charAt(0)}
+                    </WorkspacePlaceholder>
+                  }
+                />
+              )
+          )}
+          {workspace.members.length > 0 &&
+            workspace.members.map((item) => (
+              <SidebarItem
+                href={`/dashboard/${item.WorkSpace.id}`}
+                selected={pathname === `/dashboard/${item.WorkSpace.id}`}
+                title={item.WorkSpace.name}
+                notifications={0}
+                key={item.WorkSpace.name}
+                icon={
+                  <WorkspacePlaceholder>
+                    {item.WorkSpace.name.charAt(0)}
+                  </WorkspacePlaceholder>
+                }
+              />
+            ))}
+        </ul>
+      </nav>
+      <Separator className="w-4/5" />
+       {workspace.subscription?.plan === 'FREE' && (
+        <GlobalCard
+          title="Upgrade to Pro"
+          description=" Unlock AI features like transcription, AI summary, and more."
+          footer={
+            <Button className="text-sm w-full">
+              <Loader>Upgrade</Loader>
+            </Button>
+          }
+        />
+      )}
     </div>
-  );
-};
+    );
+    return (
+      <div className="full">
+        <InfoBar />
+        <div className="md:hidden fixed my-4">
+          <Sheet>
+            <SheetTrigger asChild className="ml-2">
+              <Button variant="ghost" className="mt-[2px]">
+                <Menu size={20} />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-fit h-full">
+              {SidebarSection}
+            </SheetContent>
+          </Sheet>
+        </div>
+        <div className="md:block hidden h-full">{SidebarSection}</div>
+      </div>
+    )
+  };
 
 export default Sidebar;

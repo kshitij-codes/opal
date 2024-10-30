@@ -153,3 +153,85 @@ export const getWorkSpaces = async (workSpaceId: string) => {
     return { status: 400 };
   }
 };
+
+export const createWorkspace = async (name: string) => {
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return { status: 404 };
+    }
+    const authorized = await db.user.findUnique({
+      where: {
+        clerkid: user.id,
+      },
+      select: {
+        subscription: {
+          select: {
+            plan: true,
+          },
+        },
+      },
+    });
+    if (authorized?.subscription?.plan === "PRO") {
+      const workspace = await db.user.update({
+        where: {
+          clerkid: user.id,
+        },
+        data: {
+          workspace: {
+            create: {
+              name,
+              type: "PUBLIC",
+            },
+          },
+        },
+      });
+      if (workspace) {
+        return { status: 201, data: "Workspace created" };
+      }
+      return {
+        status: 401,
+        data: "You are not authorized to create a workspace",
+      };
+    }
+  } catch (error) {
+    return { status: 400 };
+  }
+};
+
+export const renameFolders = async (folderId: string, name: string) => {
+  try {
+    const folder = await db.folder.update({
+      where: {
+        id: folderId,
+      },
+      data: {
+        name,
+      },
+    });
+    if (folder) {
+      return { status: 200, data: "Folder renamed" };
+    }
+    return { status: 400, data: "Folder does not exist" };
+  } catch (error) {
+    return { status: 400, data: "Oops! something went wrong" };
+  }
+};
+
+export const createFolder = async (workSpaceId: string) => {
+  try {
+    const isNewFolder = await db.workSpace.update({
+      where: {
+        id: workSpaceId,
+      },
+      data: {
+        folders: { create: { name: "Untitled" } },
+      },
+    });
+    if (isNewFolder) {
+      return { status: 200, data: "New Folder created" };
+    }
+  } catch (error) {
+    return { status: 500, data: "Oops! something went wrong" };
+  }
+};

@@ -31,7 +31,6 @@ const Layout = async ({ params: { workSpaceId }, children }: Props) => {
     redirect("/auth/sign-in");
   }
   const hasAccess = await verifyAccessToWorkspace(workSpaceId);
-  console.log("==================", hasAccess);
   if (hasAccess.status !== 200) {
     redirect(`/dashboard/${auth.user?.workspace[0].id}`);
   }

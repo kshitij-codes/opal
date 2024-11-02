@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from "react";
 type Props = {
   params: {
-    workspaceId: string;
+    workSpaceId: string;
   };
 };
 const Page = ({ params }: Props) => {
@@ -29,12 +29,12 @@ const Page = ({ params }: Props) => {
           </TabsList>
           <div className="flex gap-x-3">
             <CreateWorkspace />
-            <CreateFolders workspaceId={params.workspaceId} />
+            <CreateFolders workspaceId={params.workSpaceId} />
           </div>
         </div>
         <section className="py-9">
           <TabsContent value="videos">
-            <Folders workspaceId={params.workspaceId} />
+            <Folders workspaceId={params.workSpaceId} />
           </TabsContent>
           <TabsContent value="archive">Archive</TabsContent>
         </section>

@@ -34,7 +34,6 @@ const Folders = ({ workspaceId }: Props) => {
 
   const { latestVariables } = useMutationDataState(["create-folder"]);
   const { status, data: folders } = data as FolderProps;
-
   if (isFetched && folders) {
   }
 

@@ -57,7 +57,7 @@ export const getWorkspaceFolders = async (workSpaceId: string) => {
     if (folders && folders.length > 0) {
       return {
         status: 200,
-        data: { folders: folders },
+        data: folders,
       };
     }
     return { status: 404, data: [] };

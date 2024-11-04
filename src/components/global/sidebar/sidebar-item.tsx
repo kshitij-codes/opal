@@ -10,15 +10,15 @@ type Props = {
   notifications?: number;
 };
 
-const SidebarItem = ({ icon, title, href, selected, notifications }: Props) => {
+const SidebarItem = ({ href, icon, selected, title, notifications }: Props) => {
   return (
-    <li className="cursor-pointer">
+    <li className="cursor-pointer my-[5px]">
       <Link
+        href={href}
         className={cn(
           "flex items-center justify-between group rounded-lg hover:bg-[#1D1D1D]",
           selected ? "bg-[#1D1D1D]" : ""
         )}
-        href={href}
       >
         <div className="flex items-center gap-2 transition-all p-[5px] cursor-pointer">
           {icon}
@@ -31,6 +31,7 @@ const SidebarItem = ({ icon, title, href, selected, notifications }: Props) => {
             {title}
           </span>
         </div>
+        {}
       </Link>
     </li>
   );

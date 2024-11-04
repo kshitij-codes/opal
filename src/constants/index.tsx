@@ -15,7 +15,7 @@ export const MENU_ITEMS = (
     icon: <Home />,
   },
   {
-    title: "My Libraru",
+    title: "My Library",
     href: `/dashboard/${workspaceId}`,
     icon: <FileDuoToneBlack />,
   },

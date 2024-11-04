@@ -48,7 +48,7 @@ const Layout = async ({ params: { workSpaceId }, children }: Props) => {
   });
   await query.prefetchQuery({
     queryKey: ["user-workspaces"],
-    queryFn: () => getWorkSpaces(workSpaceId),
+    queryFn: () => getWorkSpaces(),
   });
   await query.prefetchQuery({
     queryKey: ["user-notifications"],
@@ -57,7 +57,7 @@ const Layout = async ({ params: { workSpaceId }, children }: Props) => {
   return (
     <HydrationBoundary state={dehydrate(query)}>
       <div className="flex h-screen w-screen">
-        <Sidebar activeWorkSpaceId={workSpaceId} />
+        <Sidebar activeWorkspaceId={workSpaceId} />
         <div className="w-full pt-28 p-6 overflow-y-scroll overflow-x-hidden">
           <GlobalHeader workspace={hasAccess.data?.workspace} />
           <div className="mt-4">{children}</div>
